@@ -42,7 +42,7 @@ public class PortService {
             }
 
         }
-
+        executorService.shutdown();
         PORT.setActualContainer(portUtilGenerator.generateNumberOfContainerForPort());
 
     }
