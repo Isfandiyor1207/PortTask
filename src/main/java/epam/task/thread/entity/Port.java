@@ -8,20 +8,19 @@ public class Port {
 
     public static final int MAXIMUM_CAPACITY_FOR_BOAT = 1;
     public static final int MAXIMUM_CAPACITY = 1000;
-    private static Port INSTANCE;
     private int actualContainer;
 
-    public Port() {
+    private Port() {
         PortGenerator generator=new PortGenerator();
         actualContainer = generator.generateNumberOfContainerForPort();
     }
 
-    public static Port getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new Port();
-        }
+    private static final class InstanceHolder {
+        private static final Port instance = new Port();
+    }
 
-        return INSTANCE;
+    public static Port getInstance() {
+        return InstanceHolder.instance;
     }
 
     public int getActualContainer() {

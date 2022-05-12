@@ -4,8 +4,8 @@ import epam.task.thread.entity.Boat;
 
 public class BoatValidation {
 
-    public int checkActionIsTrue(int actualContainers) {
-        return actualContainers < Boat.MAXIMUM_CAPACITY_OF_BOAT ? 0 : 1;
+    public int putActionForBoat(int actualContainers) {
+        return actualContainers < Boat.MAXIMUM_CAPACITY_OF_BOAT ? 1 : 0;
     }
 
     public boolean checkBoatToEmpty(int actualContainerInBoat) {

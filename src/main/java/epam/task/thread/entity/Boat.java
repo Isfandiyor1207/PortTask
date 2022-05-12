@@ -1,18 +1,20 @@
 package epam.task.thread.entity;
 
-import epam.task.thread.enums.Action;
 import epam.task.thread.service.PortService;
+import epam.task.thread.type.Action;
 import epam.task.thread.validation.BoatValidation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.StringJoiner;
+import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
-public class Boat implements Runnable {
+public class Boat extends TimerTask {
 
-    private static final Logger LOGGER= LogManager.getLogger();
-    private static final Semaphore SEMAPHORE = new Semaphore(Port.MAXIMUM_CAPACITY_FOR_BOAT, true);
+    private static final Logger logger= LogManager.getLogger();
+    private static final Semaphore semaphore = new Semaphore(Port.MAXIMUM_CAPACITY_FOR_BOAT, true);
     public static final int MAXIMUM_CAPACITY_OF_BOAT = 100;
     private int boatNumber;
     private Action action;
@@ -26,7 +28,7 @@ public class Boat implements Runnable {
 
         this.boatNumber = boatNumber;
         this.actualContainerInBoat = actualContainerInBoat;
-        this.action = Action.values()[boatValidation.checkActionIsTrue(this.actualContainerInBoat)];
+        this.action = Action.values()[boatValidation.putActionForBoat(this.actualContainerInBoat)];
     }
 
     public int getBoatNumber() {
@@ -58,12 +60,15 @@ public class Boat implements Runnable {
         PortService portService = new PortService();
 
         try {
-            SEMAPHORE.acquire();
+            semaphore.acquire();
             portService.taskManager(this);
+            logger.info("Boat by this thread name {} is entered to port", this.getBoatNumber());
+            TimeUnit.MILLISECONDS.sleep((long) (Math.random()*200+300));
 
-            SEMAPHORE.release();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } finally {
+            semaphore.release();
         }
 
 
