@@ -7,6 +7,8 @@ import epam.task.thread.validation.PortValidation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -20,25 +22,36 @@ public class PortService {
 
     public void taskManager(Boat boat) {
         BoatValidation validation = new BoatValidation();
+
+        logger.info("Thread by name {} and boat by this number {}\n",
+                Thread.currentThread().getName(),
+                boat.getBoatNumber());
+
         try {
             if (validation.checkBoatToEmpty(boat.getActualContainerInBoat())) {
-                loadingContainerToBoat(boat.getActualContainerInBoat());
+                loadingContainerToBoat(boat);
                 boat.setActualContainerInBoat(Boat.MAXIMUM_CAPACITY_OF_BOAT);
 
-                logger.info("Boat by this thread name {} and by this number №_{} has loaded containers",
+                logger.info("Thread name {} and boat by this number {} has loaded containers",
                         Thread.currentThread().getName(),
                         boat.getBoatNumber());
             } else {
-                unloadingContainerToPort(boat.getActualContainerInBoat());
+                unloadingContainerToPort(boat);
                 boat.setActualContainerInBoat(0);
-                logger.info("Boat by this thread name {} and by this number №_{} has unloaded containers",
+                logger.info("Thread name {} and boat by this number №_{} has unloaded containers",
+                        Thread.currentThread().getName(),
+                        boat.getBoatNumber());
+                System.out.printf("Thread name {%s} and boat by this number №_{%s} has unloaded containers\n",
                         Thread.currentThread().getName(),
                         boat.getBoatNumber());
             }
 
-            TimeUnit.MILLISECONDS.sleep((long) (Math.random()*200+300));
+            TimeUnit.MILLISECONDS.sleep((long) (Math.random()*2000+300));
 
-            logger.info("Boat by this thread name {} and by this number №_{} has left the Port",
+            logger.info("Thread name {} and boat by this number №_{} has left the Port",
+                    Thread.currentThread().getName(),
+                    boat.getBoatNumber());
+            System.out.printf("Thread name {%s} and boat by this number №_{%S} has left the Port\n",
                     Thread.currentThread().getName(),
                     boat.getBoatNumber());
 
@@ -47,7 +60,8 @@ public class PortService {
         }
     }
 
-    public void unloadingContainerToPort(int numberOfContainersInShip) {
+    public void unloadingContainerToPort(Boat boat) {
+        int numberOfContainersInShip=boat.getActualContainerInBoat();
         int actualContainerInPort = PORT.getActualContainer();
         PortValidation validation = new PortValidation();
         try {
@@ -56,16 +70,22 @@ public class PortService {
 
             int loadingContainers = actualContainerInPort + numberOfContainersInShip;
 
+
             while (!validation.checkPortToEmpty(actualContainerInPort) || loadingContainers > Port.MAXIMUM_CAPACITY) {
-                condition.await();
-                logger.error("The port cannot accept all containers on board.");
+
+                Timer timer=new Timer();
+                timer.scheduleAtFixedRate(boat, 1000, 2000);
+//                condition.await();
+                timer.cancel();
+//                logger.error("The port cannot accept all containers on board.");
             }
+
 
             PORT.setActualContainer(loadingContainers);
 
-        } catch (InterruptedException e) {
-            logger.error("Unloading to Port from boat by name failed.");
-            Thread.currentThread().interrupt();
+//        } catch (InterruptedException e) {
+//            logger.error("Unloading to Port from boat by name failed.");
+//            Thread.currentThread().interrupt();
         } finally {
             lock.unlock();
         }
@@ -73,7 +93,8 @@ public class PortService {
     }
 
 
-    public void loadingContainerToBoat(int numberOfContainersInShip) {
+    public void loadingContainerToBoat(Boat boat) {
+        int numberOfContainersInShip=boat.getActualContainerInBoat();
         int actualContainerInPort = PORT.getActualContainer();
         PortValidation validation = new PortValidation();
         try {
@@ -81,14 +102,17 @@ public class PortService {
             lock.lock();
 
             while (!validation.checkNumberOfContainerAvailable(numberOfContainersInShip)) {
-                condition.await();
-                logger.error("There is not enough container to load boat.");
+                Timer timer=new Timer();
+                timer.scheduleAtFixedRate(boat, 1000, 2000);
+//                condition.await();
+//                logger.error("There is not enough container to load boat.");
+                timer.cancel();
             }
 
             PORT.setActualContainer(actualContainerInPort - numberOfContainersInShip);
 
-        } catch (InterruptedException e) {
-            logger.error("Unloading to Port from boat by name failed.");
+//        } catch (InterruptedException e) {
+//            logger.error("Unloading to Port from boat by name failed.");
         } finally {
             lock.unlock();
         }
