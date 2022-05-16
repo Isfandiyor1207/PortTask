@@ -41,17 +41,11 @@ public class PortService {
                 logger.info("Thread name {} and boat by this number №_{} has unloaded containers",
                         Thread.currentThread().getName(),
                         boat.getBoatNumber());
-                System.out.printf("Thread name {%s} and boat by this number №_{%s} has unloaded containers\n",
-                        Thread.currentThread().getName(),
-                        boat.getBoatNumber());
             }
 
             TimeUnit.MILLISECONDS.sleep((long) (Math.random()*2000+300));
 
             logger.info("Thread name {} and boat by this number №_{} has left the Port",
-                    Thread.currentThread().getName(),
-                    boat.getBoatNumber());
-            System.out.printf("Thread name {%s} and boat by this number №_{%S} has left the Port\n",
                     Thread.currentThread().getName(),
                     boat.getBoatNumber());
 
